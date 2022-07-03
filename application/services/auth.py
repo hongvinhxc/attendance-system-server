@@ -1,11 +1,9 @@
-import logging
-from application import config
+from application.log_handlers import logger
 from application.models.auth import Auth
+from application.services import BaseService
 
 
-logger = logging.getLogger(config.CloudPortalApi.APP_NAME)
-
-class AuthService():
+class AuthService(BaseService):
     def __init__(self):
         pass
 

@@ -2,7 +2,6 @@ import mongoengine as db
 from . import BaseDocument
 
 class Auth(BaseDocument):
-    _id = db.ObjectIdField()
     username = db.StringField()
     password = db.StringField()
     password_history = db.ListField(db.StringField())

@@ -1,14 +1,11 @@
 
 import argon2
 import re
-import logging
-from application import config
 from application.services.auth import AuthService
+from application.log_handlers import logger
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 
-
-logger = logging.getLogger(config.CloudPortalApi.APP_NAME)
 
 argon2_hasher = argon2.PasswordHasher(
     time_cost=3, # number of iterations
