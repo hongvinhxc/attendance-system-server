@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
@@ -17,6 +18,7 @@ from application import error_handlers
 
 def create_app(config_object=None):
     app = Flask(config.CloudPortalApi.APP_NAME)
+    CORS(app)
 
     app.config.from_object(config.CloudPortalApi)
     app.config.from_object(config_object)
