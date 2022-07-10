@@ -1,6 +1,6 @@
 import os
 
-class CloudPortalApi(object):
+class PortalApi(object):
     FILENAME = __file__
 
     APP_NAME = "attendance-system"
@@ -28,3 +28,5 @@ class CloudPortalApi(object):
             'PORT': 27017
         }
     ]
+
+    IMAGES_FOLDER_PATH = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'application', 'face_detector', 'train')

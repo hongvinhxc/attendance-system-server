@@ -46,10 +46,8 @@ class ProfileService(BaseService):
         update profile
         """
         try:
-            print(doc)
             profile = Profile.objects.get(id=profile_id)
             profile.update(**doc)
-            # profile.save()
             return True, "Update profile successfull"
         except ValidationError as error:
             error_message = error.message
@@ -75,6 +73,22 @@ class ProfileService(BaseService):
         except ValidationError as error:
             error_message = error.message
             logger.error(error)
+        except DoesNotExist as error:
+            error_message = "An employee with this id does not exist"
+            logger.error(error)
+        except Exception as error:
+            error_message = error
+            logger.error(error)
+        return False, error_message
+
+    def delete_profile(self, profile_id):
+        """
+        delete a profile by id
+        """
+        try:
+            profile = Profile.objects.get(id=profile_id)
+            profile.delete()
+            return True, "Delete profile successfull"
         except DoesNotExist as error:
             error_message = "An employee with this id does not exist"
             logger.error(error)

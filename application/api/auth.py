@@ -31,7 +31,10 @@ class Logout(Resource):
 
     @jwt_required()
     def get(self):
-        response = jsonify({"msg": "Logout successful"})
+        response = jsonify({
+            "status": True,
+            "message":"Logout successful"
+        })
         unset_jwt_cookies(response)
         return response
 

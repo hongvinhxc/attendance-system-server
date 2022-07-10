@@ -5,7 +5,7 @@ from flask import Flask
 from application import config
 
 
-logger = logging.getLogger(config.CloudPortalApi.APP_NAME)
+logger = logging.getLogger(config.PortalApi.APP_NAME)
 
 def init_app(app: Flask):
     """

@@ -17,10 +17,10 @@ from application import error_handlers
 
 
 def create_app(config_object=None):
-    app = Flask(config.CloudPortalApi.APP_NAME)
+    app = Flask(config.PortalApi.APP_NAME)
     CORS(app)
 
-    app.config.from_object(config.CloudPortalApi)
+    app.config.from_object(config.PortalApi)
     app.config.from_object(config_object)
 
     configure_extensions(app)

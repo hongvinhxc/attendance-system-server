@@ -18,3 +18,7 @@ class BaseDocument(db.DynamicDocument):
             self.creation_date = datetime.datetime.now()
         self.modified_date = datetime.datetime.now()
         return super(BaseDocument, self).save(*args, **kwargs)
+
+    def update(self, *args, **kwargs):
+        self.modified_date = datetime.datetime.now()
+        return super(BaseDocument, self).update(*args, **kwargs)

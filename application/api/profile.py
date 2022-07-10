@@ -18,7 +18,7 @@ class Profile(Resource):
     @use_args(GetProfileListParameters(), location='query')
     def get(self, args):
         result = ProfileController().get_profiles(args)
-        return jsonify(success=True, data=result)
+        return jsonify(status=True, data=result)
 
     @jwt_required()
     @use_args(ProfileParameters())
@@ -53,7 +53,29 @@ class ProfileDetail(Resource):
         
     @jwt_required()
     @use_args(ProfileParameters())
-    def post(self, args, **kwargs):
+    def put(self, args, **kwargs):
         profile_id = kwargs['profile_id']
         status, result = ProfileController().update_profile(profile_id, args)
-        return jsonify(success=status, data=result)
+        return jsonify(status=status, message=result)
+        
+    @jwt_required()
+    def delete(self, **kwargs):
+        profile_id = kwargs['profile_id']
+        status, result = ProfileController().delete_profile(profile_id)
+        return jsonify(status=status, message=result)
+
+@ns.route('/get-images/<string:profile_id>')
+class ProfileDetail(Resource):
+
+    @jwt_required()
+    def get(self, **kwargs):
+        profile_id = kwargs['profile_id']
+        status, result = ProfileController().get_profile_images(profile_id)
+        response = {
+            "status": status
+        }
+        if status: 
+            response['data'] = result
+        else:
+            response['message'] = result
+        return jsonify(response)
