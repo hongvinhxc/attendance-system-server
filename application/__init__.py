@@ -15,6 +15,14 @@ from application import models
 from application import log_handlers
 from application import error_handlers
 
+def create_app_without_api(config_object=None):
+    app = Flask(config.PortalApi.APP_NAME)
+    app.config.from_object(config.PortalApi)
+    app.config.from_object(config_object)
+    configure_extensions(app)
+    configure_log_handlers(app)
+    configure_error_handlers(app)
+    return app
 
 def create_app(config_object=None):
     app = Flask(config.PortalApi.APP_NAME)

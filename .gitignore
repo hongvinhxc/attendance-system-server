@@ -80,3 +80,5 @@ target/
 .idea
 .vscode
 *.pyc
+
+profile-images/

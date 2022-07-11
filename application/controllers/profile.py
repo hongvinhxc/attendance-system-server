@@ -41,6 +41,7 @@ class ProfileController():
             images = doc.get("images", [])
             del doc["images"]
         self.write_image_to_folder(profile_id, images)
+        doc["trained"] = False
         return ProfileService().update_profile(profile_id, doc)
    
     def delete_profile(self, profile_id):

@@ -37,7 +37,7 @@ class ProfileService(BaseService):
             error_message = "An employee with this employee code already exists"
             logger.error(error)
         except Exception as error:
-            error_message = error
+            error_message = str(error)
             logger.error(error)
         return False, error_message
     
@@ -59,7 +59,7 @@ class ProfileService(BaseService):
             error_message = "An employee with this employee code already exists"
             logger.error(error)
         except Exception as error:
-            error_message = error
+            error_message = str(error)
             logger.error(error)
         return False, error_message
 
@@ -77,7 +77,7 @@ class ProfileService(BaseService):
             error_message = "An employee with this id does not exist"
             logger.error(error)
         except Exception as error:
-            error_message = error
+            error_message = str(error)
             logger.error(error)
         return False, error_message
 
@@ -93,6 +93,18 @@ class ProfileService(BaseService):
             error_message = "An employee with this id does not exist"
             logger.error(error)
         except Exception as error:
-            error_message = error
+            error_message = str(error)
             logger.error(error)
         return False, error_message
+
+    def get_untrain_profile_ids(self):
+        """
+        get all untrain profile ids
+        """
+        try:
+            
+            profiles = Profile.objects(trained=False).values_list("id")
+            return [str(id) for id in list(profiles)]
+        except Exception as error:
+            logger.error(error)
+            return []

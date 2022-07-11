@@ -29,4 +29,11 @@ class PortalApi(object):
         }
     ]
 
-    IMAGES_FOLDER_PATH = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'application', 'face_detector', 'train')
+    CONFIDENCE = 0.6
+
+    DATA_PATH = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'application', 'data')
+    IMAGES_FOLDER_PATH = os.path.join(DATA_PATH, 'profile-images')
+    MODEL_FOLDER_PATH = os.path.join(DATA_PATH, 'model')
+    PROTOTXT_PATH = os.path.join(MODEL_FOLDER_PATH, "deploy.prototxt")
+    CAFFEMODEL_PATH = os.path.join(MODEL_FOLDER_PATH, "weights.caffemodel")
+    MODEL_TRAINED_PATH = os.path.join(DATA_PATH, "model.clf")
