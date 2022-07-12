@@ -1,6 +1,7 @@
 import os
 import base64
 import shutil
+from application.services.detect_face import EncodedFaceService
 from application.services.profile import ProfileService
 from application import config
 from application.log_handlers import logger
@@ -45,7 +46,12 @@ class ProfileController():
         return ProfileService().update_profile(profile_id, doc)
    
     def delete_profile(self, profile_id):
-        return ProfileService().delete_profile(profile_id)
+        status, result = ProfileService().delete_profile(profile_id)
+        if status:
+            EncodedFaceService().delete_encoded_face(profile_id)
+            folder_path = os.path.join(config.PortalApi.IMAGES_FOLDER_PATH, profile_id)
+            shutil.rmtree(folder_path, ignore_errors=True)
+        return status, result
 
     def write_image_to_folder(self, profile_id, images):
         folder_path = os.path.join(config.PortalApi.IMAGES_FOLDER_PATH, profile_id)

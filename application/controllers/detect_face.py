@@ -1,7 +1,9 @@
+import base64
 import math
 import pickle
 import cv2
 import numpy as np
+import io
 import os
 import face_recognition
 from face_recognition.face_recognition_cli import image_files_in_folder
@@ -9,7 +11,7 @@ from sklearn import neighbors
 
 from application import config
 from application.log_handlers import logger
-from application.services.encoded_face import EncodedFaceService
+from application.services.detect_face import EncodedFaceService
 from application.services.profile import ProfileService
 
 
@@ -46,11 +48,11 @@ class DetectFaceController():
             face_bounding_boxes = self.return_box_faces(image=image)
 
             if len(face_bounding_boxes) != 1:
-                #nếu có nhiều hơn 1 khuôn mặt thì bỏ qua ảnh đó
+                # nếu có nhiều hơn 1 khuôn mặt thì bỏ qua ảnh đó
                 logger.debug("Image {} not suitable for training: {}".format(img_path, "Didn't find a face" if len(
                     face_bounding_boxes) < 1 else "Found more than one face"))
             else:
-                # thêm mã hóa của khuông mặt vào mảng của dữ liệu để chuẩn bị huấn luyện
+                # thêm mã hóa của khuôn mặt vào mảng của dữ liệu để chuẩn bị huấn luyện
                 data.append(face_recognition.face_encodings(image, known_face_locations=face_bounding_boxes)[0].tolist())
         return data
 
@@ -60,8 +62,8 @@ class DetectFaceController():
             box_faces = [(box[1], box[2], box[3], box[0]) for box in list_box.astype("int")]
         except:
             box_faces = []
-        #trả về danh sách các khuôn mặt detect đc dạng list tuple điểm, 1 tuple là 1 khuon mat
-        #tuple dạng (y0,x1,y1,x0)
+        # trả về danh sách các khuôn mặt detect đc dạng list tuple điểm, 1 tuple là 1 khuôn mat
+        # tuple dạng (y0,x1,y1,x0)
         return box_faces
 
     def return_box(self, image):
@@ -103,7 +105,7 @@ class DetectFaceController():
                 encoded_data.append(np.fromiter(encode_face, dtype=float))
                 labels.append(item["_id"])
 
-        #xác định số cụm knn hay số người cần nhận diện
+        # xác định số cụm knn hay số người cần nhận diện
         n_neighbors = int(round(math.sqrt(len(encoded_data))))
         # tạo và train
         knn_clf = neighbors.KNeighborsClassifier(n_neighbors=n_neighbors, algorithm="ball_tree", weights='distance')
@@ -117,3 +119,39 @@ class DetectFaceController():
             with open(model_save_path, 'wb') as f:
                 pickle.dump(knn_clf, f)
                 logger.info("Trained new model: %s", knn_clf)
+
+    def predict_face(self, image): 
+        list_face_id = self.detect_face_id(image)
+        if not list_face_id:
+            return False, "No known people can be found"
+        
+        return ProfileService().get_profiles_ids(list_face_id)
+
+    def detect_face_id(self, image):
+        """
+        detect face
+        """
+        try:
+            
+            with open(config.PortalApi.MODEL_TRAINED_PATH, 'rb') as f:
+                knn_clf = pickle.load(f)
+            # tải ảnh và tìm kiếm khuôn mặt
+            X_img = face_recognition.load_image_file(io.BytesIO(base64.b64decode(image)))
+            X_face_locations = self.return_box_faces(X_img)
+
+            # nếu ko có khuôn mặt trả về mảng rỗng
+            if len(X_face_locations) == 0:
+                return None
+
+            # chuyển khuôn mặt về dữ liệu mã hóa
+            faces_encodings = face_recognition.face_encodings(X_img, known_face_locations=X_face_locations)
+
+            # sử dụng KNN để dự đoán và trả về kết quả
+            closest_distances = knn_clf.kneighbors(faces_encodings, n_neighbors=1)
+            are_matches = [closest_distances[0][i][0] <= config.PortalApi.DISTANCE_THRESHOLD for i in range(len(X_face_locations))]
+
+            # Xóa những người có kết quả dưới ngưỡng
+            return [pred for pred, rec in zip(knn_clf.predict(faces_encodings), are_matches) if rec]
+        except Exception as error:
+            logger.error(error)
+            return None

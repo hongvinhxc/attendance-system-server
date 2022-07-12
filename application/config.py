@@ -30,6 +30,7 @@ class PortalApi(object):
     ]
 
     CONFIDENCE = 0.6
+    DISTANCE_THRESHOLD = 0.5
 
     DATA_PATH = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'application', 'data')
     IMAGES_FOLDER_PATH = os.path.join(DATA_PATH, 'profile-images')

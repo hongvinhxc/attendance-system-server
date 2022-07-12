@@ -7,6 +7,7 @@ from flask_jwt_extended import jwt_required
 
 from application.controllers.auth import AuthController
 from application.schemas.auth import LoginParameters, ChangePasswordParameters
+from helpers import pack_result
 
 
 ns = Namespace('auth')
@@ -31,10 +32,7 @@ class Logout(Resource):
 
     @jwt_required()
     def get(self):
-        response = jsonify({
-            "status": True,
-            "message":"Logout successful"
-        })
+        response = pack_result(True, "Logout successful")
         unset_jwt_cookies(response)
         return response
 

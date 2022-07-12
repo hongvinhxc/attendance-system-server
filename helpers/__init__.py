@@ -4,6 +4,7 @@ import string
 from datetime import date, datetime
 
 from bson import ObjectId
+from flask import jsonify
 
 
 def random_string():
@@ -24,3 +25,14 @@ def json_serial(obj):
 
 def serialize_bson_respone(obj):
     return json.loads(json.dumps(obj, default=json_serial))
+
+def pack_result(status=True, data=None, message=None):
+    """
+    pack result for http response
+    """
+    response = {
+        "status": status,
+        "data": data,
+        "message": message
+    }
+    return jsonify(response)

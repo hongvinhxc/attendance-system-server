@@ -24,6 +24,13 @@ class ProfileService(BaseService):
         filter = self.build_regex(filter)
         profiles = Profile.objects(**filter).limit(limit).skip(offset)
         return self.to_dict(list(profiles))
+  
+    def get_profiles_ids(self, ids):
+        """
+        get profile by list id
+        """
+        profiles = Profile.objects(id__in=ids)
+        return True, self.to_dict(list(profiles))
 
     def add_profile(self, doc):
         """
@@ -48,7 +55,7 @@ class ProfileService(BaseService):
         try:
             profile = Profile.objects.get(id=profile_id)
             profile.update(**doc)
-            return True, "Update profile successfull"
+            return True, "Update profile successful"
         except ValidationError as error:
             error_message = error.message
             logger.error(error)
@@ -88,7 +95,7 @@ class ProfileService(BaseService):
         try:
             profile = Profile.objects.get(id=profile_id)
             profile.delete()
-            return True, "Delete profile successfull"
+            return True, "Delete profile successful"
         except DoesNotExist as error:
             error_message = "An employee with this id does not exist"
             logger.error(error)

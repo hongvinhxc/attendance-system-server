@@ -1,8 +1,9 @@
 from flask import Blueprint, Flask
 from flask_restx import Api
 
-from .profile import ns as profile_ns
 from .auth import ns as auth_ns
+from .profile import ns as profile_ns
+from .detect_face import ns as detect_face_ns
 
 def init_app(app: Flask):
 
@@ -12,5 +13,6 @@ def init_app(app: Flask):
     app.register_blueprint(blueprint)
 
     # add namespace bellow here
-    api.add_namespace(profile_ns)
     api.add_namespace(auth_ns)
+    api.add_namespace(profile_ns)
+    api.add_namespace(detect_face_ns)
