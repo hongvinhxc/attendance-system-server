@@ -6,7 +6,7 @@ from flask_jwt_extended import unset_jwt_cookies
 from flask_jwt_extended import jwt_required
 
 from application.controllers.auth import AuthController
-from application.schemas.auth import LoginParameters, ChangePasswordParameters
+from application.schemas.auth import LoginSchema, ChangePasswordSchema
 from helpers import pack_result
 
 
@@ -16,7 +16,7 @@ ns = Namespace('auth')
 @ns.route('/login')
 class Login(Resource):
 
-    @use_args(LoginParameters())
+    @use_args(LoginSchema())
     def post(self, args):
         username = args["username"]
         password = args["password"]
@@ -41,7 +41,7 @@ class Logout(Resource):
 class ChangPassword(Resource):
 
     @jwt_required()
-    @use_args(ChangePasswordParameters())
+    @use_args(ChangePasswordSchema())
     def post(self, args):
         password = args["password"]
         new_password = args["new_password"]

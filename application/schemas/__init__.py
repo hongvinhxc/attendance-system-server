@@ -4,6 +4,6 @@ class BaseSchema(Schema):
     class Meta:
         unknown = EXCLUDE
 
-class PaginationParameters(BaseSchema):
+class PaginationSchema(BaseSchema):
     size = fields.Int(load_default=10)
     page = fields.Int(load_default=1)
