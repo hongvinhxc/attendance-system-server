@@ -1,4 +1,5 @@
 import base64
+from datetime import datetime
 import math
 import pickle
 import cv2
@@ -11,6 +12,7 @@ from sklearn import neighbors
 
 from application import config
 from application.log_handlers import logger
+from application.services.attendance import AttendanceService
 from application.services.detect_face import EncodedFaceService
 from application.services.profile import ProfileService
 
@@ -121,9 +123,16 @@ class DetectFaceController():
                 logger.info("Trained new model: %s", knn_clf)
 
     def predict_face(self, image): 
+        if "," in image:
+            image = image.split(",")[1]
         list_face_id = self.detect_face_id(image)
         if not list_face_id:
             return False, "No known people can be found"
+
+        attended_ids = []
+        for id in list_face_id:
+            if self.update_attendance_info(id):
+                attended_ids.append(id)
         
         return ProfileService().get_profiles_ids(list_face_id)
 
@@ -155,3 +164,28 @@ class DetectFaceController():
         except Exception as error:
             logger.error(error)
             return None
+
+    def update_attendance_info(self, id):
+        """
+        update user attandance info
+        """
+        now = datetime.now()
+        status, attendance_info = AttendanceService().get_profile_attendance_by_day(id, now)
+        if not status:
+            return False
+        if not attendance_info.attendance_times:
+            doc = {
+                "profile_id": id,
+                "attendance_times": [now]
+            }
+            status, result = AttendanceService().add_attendance(doc)
+            return status
+
+        last_time = attendance_info.attendance_times[-1]
+        if (now - last_time).seconds > 10:
+            doc = {
+                "push__attendance_times": now
+            }
+            status, result = AttendanceService().update_attendance(attendance_info.id, doc)
+            return status
+        return False

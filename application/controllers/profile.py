@@ -28,7 +28,7 @@ class ProfileController():
 
     def add_profile(self, doc):
         images = []
-        if doc.get("images"):
+        if doc.get("images") is not None:
             images = doc.get("images", [])
             del doc["images"]
         code, result = ProfileService().add_profile(doc)
@@ -38,7 +38,7 @@ class ProfileController():
    
     def update_profile(self, profile_id, doc):
         images = []
-        if doc.get("images"):
+        if doc.get("images") is not None:
             images = doc.get("images", [])
             del doc["images"]
         self.write_image_to_folder(profile_id, images)
