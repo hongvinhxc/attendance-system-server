@@ -4,6 +4,7 @@ from flask_restx import Api
 from .auth import ns as auth_ns
 from .profile import ns as profile_ns
 from .detect_face import ns as detect_face_ns
+from .attendance import ns as attendance_ns
 
 def init_app(app: Flask):
 
@@ -16,3 +17,4 @@ def init_app(app: Flask):
     api.add_namespace(auth_ns)
     api.add_namespace(profile_ns)
     api.add_namespace(detect_face_ns)
+    api.add_namespace(attendance_ns)

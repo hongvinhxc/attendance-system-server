@@ -10,3 +10,4 @@ face-recognition==1.3.0
 sklearn
 argon2-cffi==21.3.0
 Flask-Cors==3.0.10
+python-dateutil==2.8.2

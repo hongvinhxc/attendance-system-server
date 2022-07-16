@@ -1,9 +1,11 @@
 from datetime import timedelta
+from dateutil import relativedelta
 from mongoengine import NotUniqueError, DoesNotExist, ValidationError
 
 from application.log_handlers import logger
 from application.models.attendance import Attendance
 from application.services import BaseService
+from helpers import get_working_days_of_month
 
 
 class AttendanceService(BaseService):
@@ -12,7 +14,7 @@ class AttendanceService(BaseService):
   
     def get_profile_attendance_by_day(self, id, day):
         """
-        get profile by date
+        get profile attendance by date
         """
         try:
             day_start = day.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -23,6 +25,45 @@ class AttendanceService(BaseService):
                 "creation_date__lt": day_end
             }
             result = Attendance.objects.get(**query)
+            return True, result
+        except Exception as error:
+            error_message = str(error)
+            logger.error(error)
+        return False, error_message
+
+    def get_profile_attendances_by_month(self, id, month):
+        """
+        get profile attendances by month
+        """
+        try:
+            day_start = month.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            day_end = day_start + relativedelta.relativedelta(months=1)
+            query = {
+                "profile_id": id,
+                "creation_date__gte": day_start,
+                "creation_date__lt": day_end
+            }
+            result = Attendance.objects(**query)
+            return True, result
+        except Exception as error:
+            error_message = str(error)
+            logger.error(error)
+        return False, error_message
+
+    def get_profile_attendances_by_month_for_calendar(self, id, month):
+        """
+        get profile attendances by month
+        """
+        try:
+            day_start = month.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            day_start = day_start - relativedelta.relativedelta(days=(day_start.weekday() + 1) % 7)
+            day_end = day_start + relativedelta.relativedelta(days=42)
+            query = {
+                "profile_id": id,
+                "creation_date__gte": day_start,
+                "creation_date__lt": day_end
+            }
+            result = Attendance.objects(**query)
             return True, result
         except Exception as error:
             error_message = str(error)
