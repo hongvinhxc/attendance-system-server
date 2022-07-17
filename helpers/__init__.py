@@ -38,31 +38,31 @@ def pack_result(status=True, data=None, message=None):
     }
     return jsonify(response)
 
-def get_working_days_of_month(now):
+def get_working_days_of_month(thismonth, working_config):
+    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    today = date(today.year, today.month, today.day)
     holidays = {
-        date(now.year, 4, 30),
-        date(now.year, 5, 1),
-        date(now.year, 9, 2),
-        }
+        date(thismonth.year, int(holiday.split("-")[1]), int(holiday.split("-")[0])) for holiday in working_config["holidays"]
+    }
     businessdays = []
     for i in range(1, 32):
         try:
-            thisdate = date(now.year, now.month, i)
+            thisdate = date(thismonth.year, thismonth.month, i)
+            if thisdate > today:
+                break
         except(ValueError):
             break
-        if thisdate.weekday() < 5 and thisdate not in holidays: # Monday == 0, Sunday == 6 
+        if thisdate.weekday() in working_config["working_day"] and thisdate not in holidays: # Monday == 0, Sunday == 6 
             businessdays.append(thisdate.day)
     return businessdays
 
-def get_working_days_in_range(start, delta):
+def get_working_days_in_range(start, delta, working_config):
     year = start.year
     if start.month == 12:
         year += 1
     holidays = {
-        date(year, 4, 30),
-        date(year, 5, 1),
-        date(year, 9, 2),
-        }
+        date(year, int(holiday.split("-")[1]), int(holiday.split("-")[0])) for holiday in working_config["holidays"]
+    }
     businessdays = []
     start = start.replace(hour=0, minute=0, second=0, microsecond=0)
     for i in range(delta):
@@ -70,6 +70,10 @@ def get_working_days_in_range(start, delta):
             thisdate = start + relativedelta.relativedelta(days=i)
         except(ValueError):
             break
-        if thisdate.weekday() < 5 and thisdate not in holidays: # Monday == 0, Sunday == 6 
+        if thisdate.weekday() in working_config["working_day"] and thisdate not in holidays: # Monday == 0, Sunday == 6 
             businessdays.append(thisdate.strftime("%Y-%m-%d"))
     return businessdays
+
+def get_seconds_from_0h(end):
+    start = end.replace(hour=0, minute=0, second=0, microsecond=0)
+    return int((end - start).total_seconds())

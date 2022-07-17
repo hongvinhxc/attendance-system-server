@@ -1,9 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil import relativedelta
+from application.constants import DAY_IN_CALENDAR
 from application.services.attendance import AttendanceService
-from application.log_handlers import logger
 from application.services.profile import ProfileService
-from helpers import get_working_days_in_range, get_working_days_of_month
+from application.services.working_time import WorkingTimeService
+from helpers import get_seconds_from_0h, get_working_days_in_range, get_working_days_of_month
 
 
 class AttendanceController():
@@ -18,7 +19,16 @@ class AttendanceController():
         offset = size * (page - 1)
         total = ProfileService().count_profiles(query)
         result = ProfileService().get_profiles(limit, offset, query)
-        working_days_in_month = get_working_days_of_month(month)
+        _, working_time = WorkingTimeService().get_working_time()
+        working_days_in_month = get_working_days_of_month(month, working_time)
+        morning = [
+            int(timedelta(hours=int(hour.split(":")[0]), minutes=int(hour.split(":")[1])).total_seconds())
+            for hour in working_time["working_time"]["morning"]
+        ]
+        afternoon = [
+            int(timedelta(hours=int(hour.split(":")[0]), minutes=int(hour.split(":")[1])).total_seconds())
+            for hour in working_time["working_time"]["afternoon"]
+        ]
         for item in result:
             creation_date = datetime.strptime(item["creation_date"], "%Y-%m-%d %H:%M:%S") \
                 .replace(hour=0, minute=0, second=0, microsecond=0)
@@ -31,10 +41,12 @@ class AttendanceController():
                 break
             working_days = [day for day in attendances if day.creation_date.day in working_days_in_month]
             day_working = len(working_days)
-            not_checkin = len([day for day in working_days if day.attendance_times[0].hour > 12])
-            not_checkout = len([day for day in working_days if day.attendance_times[-1].hour < 13])
-            day_arrive_late = len([day for day in working_days if day.attendance_times[0].hour in range(8, 13)])
-            day_leave_early = len([day for day in working_days if day.attendance_times[-1].hour in range(13, 18)])
+            not_checkin = len([day for day in working_days if \
+                get_seconds_from_0h(day.attendance_times[0]) > morning[1] and len(day.attendance_times) == 1])
+            not_checkout = len([day for day in working_days if \
+                get_seconds_from_0h(day.attendance_times[-1]) < afternoon[0] and len(day.attendance_times) == 1])
+            day_arrive_late = len([day for day in working_days if get_seconds_from_0h(day.attendance_times[0]) > morning[0]])
+            day_leave_early = len([day for day in working_days if get_seconds_from_0h(day.attendance_times[-1]) < afternoon[1]])
             item["absence"] = len(working_days_in_month) - day_working
             item["late"] = day_arrive_late
             item["early"] = day_leave_early
@@ -58,20 +70,35 @@ class AttendanceController():
             profile["calendar"] = {}
             return True, profile
 
+        status, working_time = WorkingTimeService().get_working_time()
+        if not status:
+            return status, working_time
+        
         status, result = AttendanceService().get_profile_attendances_by_month_for_calendar(id, month)
         if not status:
             return status, result
 
-        working_days_in_month = get_working_days_of_month(month)
+
+        working_days_in_month = get_working_days_of_month(month, working_time)
         working_days = {}
+
+        morning = [
+            int(timedelta(hours=int(hour.split(":")[0]), minutes=int(hour.split(":")[1])).total_seconds())
+            for hour in working_time["working_time"]["morning"]
+        ]
+        afternoon = [
+            int(timedelta(hours=int(hour.split(":")[0]), minutes=int(hour.split(":")[1])).total_seconds())
+            for hour in working_time["working_time"]["afternoon"]
+        ]
 
         for day in result:
             if day.creation_date.day not in working_days_in_month:
                 break
-            day["is_late"] = day.attendance_times[0].hour in range(8, 13)
-            day["is_early"] = day.attendance_times[-1].hour in range(13, 18)
-            day["is_not_checkin"] = day.attendance_times[0].hour > 12
-            day["is_not_checkout"] = day.attendance_times[-1].hour < 3
+
+            day["is_late"] = get_seconds_from_0h(day.attendance_times[0]) > morning[0]
+            day["is_early"] = get_seconds_from_0h(day.attendance_times[-1]) < afternoon[1]
+            day["is_not_checkin"] = get_seconds_from_0h(day.attendance_times[0]) >= afternoon[0] and len(day.attendance_times) == 1
+            day["is_not_checkout"] = get_seconds_from_0h(day.attendance_times[-1]) < afternoon[0] and len(day.attendance_times) == 1
         
         for day in result:
             working_days[day.creation_date.strftime("%Y-%m-%d")] = AttendanceService().to_dict(day)
@@ -86,8 +113,9 @@ class AttendanceController():
         
         full_days = {}
         today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        working_days_in_range = get_working_days_in_range(day_start, 42)
-        for delta in range(42):
+
+        working_days_in_range = get_working_days_in_range(day_start, DAY_IN_CALENDAR, working_time)
+        for delta in range(DAY_IN_CALENDAR):
             current_day = day_start + relativedelta.relativedelta(days=delta)
             current_day_str = current_day.strftime("%Y-%m-%d")
             if current_day > today:

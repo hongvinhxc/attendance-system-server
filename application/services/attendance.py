@@ -1,11 +1,11 @@
 from datetime import timedelta
 from dateutil import relativedelta
 from mongoengine import NotUniqueError, DoesNotExist, ValidationError
+from application.constants import DAY_IN_CALENDAR
 
 from application.log_handlers import logger
 from application.models.attendance import Attendance
 from application.services import BaseService
-from helpers import get_working_days_of_month
 
 
 class AttendanceService(BaseService):
@@ -57,7 +57,7 @@ class AttendanceService(BaseService):
         try:
             day_start = month.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
             day_start = day_start - relativedelta.relativedelta(days=(day_start.weekday() + 1) % 7)
-            day_end = day_start + relativedelta.relativedelta(days=42)
+            day_end = day_start + relativedelta.relativedelta(days=DAY_IN_CALENDAR)
             query = {
                 "profile_id": id,
                 "creation_date__gte": day_start,

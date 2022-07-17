@@ -1,0 +1,1 @@
+DAY_IN_CALENDAR = 42
