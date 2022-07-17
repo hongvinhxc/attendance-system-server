@@ -1,3 +1,4 @@
+from datetime import datetime
 from dateutil import relativedelta
 from application.services.attendance import AttendanceService
 from application.log_handlers import logger
@@ -19,6 +20,12 @@ class AttendanceController():
         result = ProfileService().get_profiles(limit, offset, query)
         working_days_in_month = get_working_days_of_month(month)
         for item in result:
+            creation_date = datetime.strptime(item["creation_date"], "%Y-%m-%d %H:%M:%S") \
+                .replace(hour=0, minute=0, second=0, microsecond=0)
+            if creation_date.month > month.month:
+                break
+            if creation_date.month == month.month:
+                working_days_in_month = [day for day in working_days_in_month if day > creation_date.day]
             status, attendances = AttendanceService().get_profile_attendances_by_month(item["_id"], month)
             if not status:
                 break
@@ -41,13 +48,19 @@ class AttendanceController():
         }
 
     def get_profile_attendances_by_month(self, id, month):
-        status, result = AttendanceService().get_profile_attendances_by_month_for_calendar(id, month)
-        if not status:
-            return status, result
-
         status, profile =  ProfileService().get_profile(id)
         if not status:
             return status, profile
+        
+        creation_month = datetime.strptime(profile["creation_date"], "%Y-%m-%d %H:%M:%S") \
+            .replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if creation_month > month:
+            profile["calendar"] = {}
+            return True, profile
+
+        status, result = AttendanceService().get_profile_attendances_by_month_for_calendar(id, month)
+        if not status:
+            return status, result
 
         working_days_in_month = get_working_days_of_month(month)
         working_days = {}
@@ -64,13 +77,21 @@ class AttendanceController():
             working_days[day.creation_date.strftime("%Y-%m-%d")] = AttendanceService().to_dict(day)
 
         day_start = month.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        day_start = day_start - relativedelta.relativedelta(days=(day_start.weekday() + 1) % 7)
+        creation_date = datetime.strptime(profile["creation_date"], "%Y-%m-%d %H:%M:%S") \
+            .replace(hour=0, minute=0, second=0, microsecond=0)
+        if creation_date > day_start:
+            day_start = creation_date
+        else:
+            day_start = day_start - relativedelta.relativedelta(days=(day_start.weekday() + 1) % 7)
         
         full_days = {}
+        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         working_days_in_range = get_working_days_in_range(day_start, 42)
         for delta in range(42):
             current_day = day_start + relativedelta.relativedelta(days=delta)
             current_day_str = current_day.strftime("%Y-%m-%d")
+            if current_day > today:
+                break
             if current_day_str in working_days:
                 full_days[current_day_str] = working_days[current_day_str]
             else:
