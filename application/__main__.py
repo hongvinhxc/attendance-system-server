@@ -22,5 +22,5 @@ def init_db():
 if __name__ == "__main__":
     if len(sys.argv) == 1:
         runserver()
-    if sys.argv[1] == "init_db":
+    if len(sys.argv) == 2 and sys.argv[1] == "init_db":
         init_db()

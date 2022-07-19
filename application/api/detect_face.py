@@ -11,7 +11,7 @@ ns = Namespace('detect-face')
 
 
 @ns.route('')
-class Profile(Resource):
+class DetectFace(Resource):
 
     @use_args(DetectFaceSchema())
     def post(self, args):

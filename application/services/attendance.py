@@ -26,6 +26,8 @@ class AttendanceService(BaseService):
             }
             result = Attendance.objects.get(**query)
             return True, result
+        except DoesNotExist as error:
+            return True, None
         except Exception as error:
             error_message = str(error)
             logger.error(error)

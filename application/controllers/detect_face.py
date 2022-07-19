@@ -173,7 +173,7 @@ class DetectFaceController():
         status, attendance_info = AttendanceService().get_profile_attendance_by_day(id, now)
         if not status:
             return False
-        if not attendance_info.attendance_times:
+        if not attendance_info:
             doc = {
                 "profile_id": id,
                 "attendance_times": [now]
