@@ -13,7 +13,7 @@ from sklearn import neighbors
 from application import config
 from application.log_handlers import logger
 from application.services.attendance import AttendanceService
-from application.services.detect_face import EncodedFaceService
+from application.services.encoded_face import EncodedFaceService
 from application.services.profile import ProfileService
 
 

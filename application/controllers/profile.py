@@ -1,7 +1,7 @@
 import os
 import base64
 import shutil
-from application.services.detect_face import EncodedFaceService
+from application.services.encoded_face import EncodedFaceService
 from application.services.profile import ProfileService
 from application import config
 from application.log_handlers import logger

@@ -1,7 +1,7 @@
 from mongoengine import NotUniqueError, DoesNotExist, ValidationError
 
 from application.log_handlers import logger
-from application.models.detect_face import EncodedFace
+from application.models.encoded_face import EncodedFace
 from application.services import BaseService
 
 
