@@ -25,6 +25,13 @@ class ProfileService(BaseService):
         profiles = Profile.objects(**filter).limit(limit).skip(offset)
         return self.to_dict(list(profiles))
   
+    def get_all_profiles(self):
+        """
+        get all profile
+        """
+        profiles = Profile.objects()
+        return self.to_dict(list(profiles))
+  
     def get_profiles_ids(self, ids):
         """
         get profile by list id

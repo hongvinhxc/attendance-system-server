@@ -53,7 +53,7 @@ def get_working_days_of_month(thismonth, working_config):
         except(ValueError):
             break
         if thisdate.weekday() in working_config["working_day"] and thisdate not in holidays: # Monday == 0, Sunday == 6 
-            businessdays.append(thisdate.day)
+            businessdays.append(thisdate)
     return businessdays
 
 def get_working_days_in_range(start, delta, working_config):

@@ -33,6 +33,7 @@ class PortalApi(object):
     DISTANCE_THRESHOLD = 0.5
 
     DATA_PATH = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'application', 'data')
+    REPORTS_FOLDER_PATH = os.path.join(DATA_PATH, 'reports')
     IMAGES_FOLDER_PATH = os.path.join(DATA_PATH, 'profile-images')
     MODEL_FOLDER_PATH = os.path.join(DATA_PATH, 'model')
     PROTOTXT_PATH = os.path.join(MODEL_FOLDER_PATH, "deploy.prototxt")

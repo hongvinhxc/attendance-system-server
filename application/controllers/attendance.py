@@ -21,6 +21,7 @@ class AttendanceController():
         result = ProfileService().get_profiles(limit, offset, query)
         _, working_time = WorkingTimeService().get_working_time()
         working_days_in_month = get_working_days_of_month(month, working_time)
+        working_days_in_month = [day.day for day in working_days_in_month]
         morning = [
             int(timedelta(hours=int(hour.split(":")[0]), minutes=int(hour.split(":")[1])).total_seconds())
             for hour in working_time["working_time"]["morning"]
@@ -80,6 +81,7 @@ class AttendanceController():
 
 
         working_days_in_month = get_working_days_of_month(month, working_time)
+        working_days_in_month = [day.day for day in working_days_in_month]
         working_days = {}
 
         morning = [
@@ -127,11 +129,3 @@ class AttendanceController():
 
         profile["calendar"] = full_days
         return status, profile
-
-    def export_attendances(self, query):
-        size = query.pop('size')
-        page = query.pop('page')
-        limit = size
-        offset = size * (page - 1)
-    
-        return False, ""
