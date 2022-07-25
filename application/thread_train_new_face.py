@@ -6,11 +6,15 @@ from application import create_app_without_api
 from application.log_handlers import logger
 from application.controllers.detect_face import DetectFaceController
 
+class Config:
+    INFO_LOG = "info_worker.log"
+    ERROR_LOG = "error_worker.log"
+
 def thread_train_new_face():
     """
     thread train new face
     """
-    app = create_app_without_api()
+    app = create_app_without_api(Config)
     with app.app_context():
         while True:
             try:

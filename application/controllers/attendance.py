@@ -95,8 +95,7 @@ class AttendanceController():
 
         for day in result:
             if day.creation_date.day not in working_days_in_month:
-                break
-
+                continue
             day["is_late"] = get_seconds_from_0h(day.attendance_times[0]) > morning[0]
             day["is_early"] = get_seconds_from_0h(day.attendance_times[-1]) < afternoon[1]
             day["is_not_checkin"] = get_seconds_from_0h(day.attendance_times[0]) >= afternoon[0] and len(day.attendance_times) == 1

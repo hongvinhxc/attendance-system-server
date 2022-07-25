@@ -1,0 +1,18 @@
+version: "3.5"
+services:
+  mongo:
+    image: "mongo"
+    container_name: mongodb
+    ports:
+      - "27020:27017"
+    volumes:
+      - ./mongoData:/data/db
+
+  attendance-server:
+    image: attendance-server:latest
+    container_name: attendance-server
+    command: supervisord -c supervisor/supervisor.conf
+    ports:
+      - "8888:8888"
+    environment:
+      FLASK_ENV: "production"
