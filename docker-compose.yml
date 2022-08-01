@@ -4,15 +4,32 @@ services:
     image: "mongo"
     container_name: mongodb
     ports:
-      - "27020:27017"
+      - "27017:27017"
     volumes:
-      - ./mongoData:/data/db
+      - /data/mongoData:/data/db
+    networks:
+      attendance-system-network:
+        aliases:
+          - mongodb
 
   attendance-server:
     image: attendance-server:latest
     container_name: attendance-server
-    command: supervisord -c supervisor/supervisor.conf
+    volumes: 
+      - ./application/config.py:/opt/attendance-server/application/config.py
+    command: supervisord -n -c /opt/attendance-server/supervisor/supervisord.conf
+    sysctls:
+      - net.core.somaxconn=5000000
     ports:
       - "8888:8888"
     environment:
       FLASK_ENV: "production"
+    networks:
+      attendance-system-network:
+        aliases:
+          - attendance-server
+
+networks:
+  attendance-system-network:
+    external:
+      name: attendance-system-network

@@ -24,7 +24,7 @@ class PortalApi(object):
             'DB': 'attendance-system',
             'USERNAME': '',
             'PASSWORD': '',
-            'HOST': 'localhost',
+            'HOST': 'mongodb',
             'PORT': 27017
         }
     ]

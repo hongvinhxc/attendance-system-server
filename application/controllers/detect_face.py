@@ -48,7 +48,6 @@ class DetectFaceController():
             image = face_recognition.load_image_file(img_path)
             # sử dụng phần 1 nhận diện khuôn mặt hàm return_box_faces trả về khuôn mặt
             face_bounding_boxes = self.return_box_faces(image=image)
-            print(face_bounding_boxes)
             if len(face_bounding_boxes) != 1:
                 # nếu có nhiều hơn 1 khuôn mặt thì bỏ qua ảnh đó
                 logger.debug("Image {} not suitable for training: {}".format(img_path, "Didn't find a face" if len(
@@ -101,11 +100,8 @@ class DetectFaceController():
         labels = []
 
         data = EncodedFaceService().get_encoded_faces()
-        print("data", data)
         for item in data:
-            print("item", item)
             for encode_face in item["data"]:
-                print("encode_face", encode_face)
                 encoded_data.append(np.fromiter(encode_face, dtype=float))
                 labels.append(item["_id"])
 
