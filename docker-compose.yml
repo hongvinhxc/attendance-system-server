@@ -3,10 +3,11 @@ services:
   mongo:
     image: "mongo"
     container_name: mongodb
+    restart: always
     ports:
       - "27017:27017"
     volumes:
-      - /data/mongoData:/data/db
+      - ./mongoData:/data/db
     networks:
       attendance-system-network:
         aliases:
@@ -15,8 +16,11 @@ services:
   attendance-server:
     image: attendance-server:latest
     container_name: attendance-server
+    restart: always
     volumes: 
       - ./application/config.py:/opt/attendance-server/application/config.py
+      - ./application/data/reports:/opt/attendance-server/application/data/reports
+      - ./application/data/profile-images:/opt/attendance-server/application/data/profile-images
     command: supervisord -n -c /opt/attendance-server/supervisor/supervisord.conf
     sysctls:
       - net.core.somaxconn=5000000
